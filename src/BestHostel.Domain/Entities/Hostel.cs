@@ -11,14 +11,31 @@ public class Hostel
 
     [Required]
     [StringLength(128)]
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } = string.Empty;
 
     [Required]
-    public string Description { get; set; } = null!;
+    public string Description { get; set; } = string.Empty;
+
+    [Required]
+    public double Rate { get; set; }
+
+    [Required]
+    public int Sqft { get; set; }
+
+    [Required]
+    public int Occupancy { get; set; }
+
+    public string? ImageUrl { get; set; }
+
+    public string? Amenity { get; set; }
 
     [Required]
     [StringLength(128)]
-    public string Address { get; set; } = null!;
+    public string Address { get; set; } = string.Empty;
+
+    public DateTime CreateDate { get; set; }
+
+    public DateTime UpdateDate { get; set; }
 
     [Required]
     [Column(TypeName = "money")]

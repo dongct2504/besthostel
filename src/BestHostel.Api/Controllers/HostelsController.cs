@@ -8,6 +8,13 @@ namespace BestHostel.Api;
 [Route("api/hostels")]
 public class HostelsController : ControllerBase
 {
+    private readonly ILogger<HostelsController> _logger;
+
+    public HostelsController(ILogger<HostelsController> logger)
+    {
+        _logger = logger;
+    }
+
     [HttpGet]
     public ActionResult<IEnumerable<Hostel>> GetHostels()
     {
@@ -22,6 +29,7 @@ public class HostelsController : ControllerBase
     {
         if (id == 0)
         {
+            _logger.LogError($"GetHostel error with id: {id}");
             return BadRequest();
         }
 

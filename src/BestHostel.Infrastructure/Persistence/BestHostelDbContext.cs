@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace BestHostel.Infrastructure.Persistence;
 
 // to make it handle IdentityUser, use IdentityDbContext
-public class BestHostelDbContext : IdentityDbContext
+public class BestHostelDbContext : IdentityDbContext<BestHostelUser>
 {
     public BestHostelDbContext(DbContextOptions<BestHostelDbContext> options) : base(options)
     {
