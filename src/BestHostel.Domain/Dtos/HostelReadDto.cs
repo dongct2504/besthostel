@@ -1,18 +1,13 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace BestHostel.Domain.Dtos;
 
-public class HostelDto
+public class HostelReadDto
 {
     public int HostelId { get; set; }
 
-    [Required]
-    [StringLength(128)]
     public string Name { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
 
-    [Required]
     public double Rate { get; set; }
 
     public int Sqft { get; set; }
@@ -30,5 +25,4 @@ public class HostelDto
     public decimal DiscountPercent { get; set; }
 
     public decimal DiscountPrice { get; set; }
-
 }

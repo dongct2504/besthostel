@@ -1,16 +1,21 @@
-using System.Text.Json.Serialization;
 using BestHostel.Application;
 using BestHostel.Infrastructure;
 using BestHostel.Infrastructure.Persistence;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 {
-    builder.Services.AddControllers().AddJsonOptions(options =>
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+    // builder.Services.AddControllers().AddJsonOptions(options =>
+    //     options.JsonSerializerOptions.PropertyNamingPolicy = null);
+
+    // allows for the correct parsing of Patch document using NewtonsoftJson
+    builder.Services.AddControllers().AddNewtonsoftJson(options =>
+    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
 
     // setting connection string and register DbContext
     var sqlConnectionStringBuilder = new SqlConnectionStringBuilder
@@ -22,6 +27,9 @@ var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddDbContext<BestHostelDbContext>(options =>
         options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString));
+
+    // register automapper
+    builder.Services.AddAutoMapper(typeof(Program));
 
     // register dependencies from application and infrastructure
     builder.Services
