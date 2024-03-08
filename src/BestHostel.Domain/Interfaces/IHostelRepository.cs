@@ -4,6 +4,7 @@ public interface IHostelRepository
 {
     Task<IEnumerable<Hostel>> GetAllHostelsAsync();
     Task<Hostel?> GetHostelByIdAsync(int id);
+    Task<Hostel?> GetHostelByNameAsync(string hostelName);
 
     void CreateHostel(Hostel hostel);
     void UpdateHostel(Hostel hostel);

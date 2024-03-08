@@ -24,6 +24,11 @@ public class HostelRepository : IHostelRepository
         return await _context.Hostels.FindAsync(id);
     }
 
+    public async Task<Hostel?> GetHostelByNameAsync(string hostelName)
+    {
+        return await _context.Hostels.FirstOrDefaultAsync(h => h.Name.ToLower() == hostelName.ToLower());
+    }
+
     public void CreateHostel(Hostel hostel)
     {
         _context.Add(hostel);

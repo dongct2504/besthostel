@@ -12,12 +12,15 @@ namespace BestHostel.Api;
 public class HostelsController : ControllerBase
 {
     private readonly IHostelRepository _hostelRepository;
+    private readonly ILogger<HostelsController> _logger;
     private readonly IMapper _mapper;
 
     public HostelsController(IHostelRepository hostelRepository,
+        ILogger<HostelsController> logger,
         IMapper mapper)
     {
         _hostelRepository = hostelRepository;
+        _logger = logger;
         _mapper = mapper;
     }
 
@@ -25,6 +28,8 @@ public class HostelsController : ControllerBase
     public async Task<ActionResult<IEnumerable<HostelReadDto>>> GetAllHostels()
     {
         IEnumerable<Hostel> hostels = await _hostelRepository.GetAllHostelsAsync();
+
+        _logger.LogInformation("Getting all hostels");
 
         return Ok(_mapper.Map<IEnumerable<HostelReadDto>>(hostels));
     }
@@ -34,6 +39,7 @@ public class HostelsController : ControllerBase
     {
         if (id == 0)
         {
+            _logger.LogError($"Get hostel error with id: {id}");
             return BadRequest();
         }
 
@@ -49,6 +55,13 @@ public class HostelsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<HostelReadDto>> CreateHostel([FromBody] HostelCreateUpdateDto hostelCreateDto)
     {
+        if (await _hostelRepository.GetHostelByNameAsync(hostelCreateDto.Name) != null) // already exist in db
+        {
+            // key, value
+            ModelState.AddModelError("CustomErrorName", "Nhà trọ đã tồn tại.");
+            return BadRequest(ModelState);
+        }
+
         Hostel hostel = _mapper.Map<Hostel>(hostelCreateDto);
 
         _hostelRepository.CreateHostel(hostel);

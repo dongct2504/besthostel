@@ -4,6 +4,7 @@ using BestHostel.Domain;
 using BestHostel.Domain.Dtos;
 using BestHostel.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace BestHostel.Api.Tests;
@@ -11,12 +12,15 @@ namespace BestHostel.Api.Tests;
 public class HostelsControllerTests : IDisposable
 {
     private Mock<IHostelRepository>? _mockHostelRepository;
+    private Mock<ILogger<HostelsController>> _mockHostelLogger;
+
     private HostelsProfile? _hostelsProfile;
     private IMapper? _mapper;
 
     public HostelsControllerTests()
     {
         _mockHostelRepository = new Mock<IHostelRepository>();
+        _mockHostelLogger = new Mock<ILogger<HostelsController>>();
 
         // add real mapper
         _hostelsProfile = new HostelsProfile();
@@ -42,7 +46,7 @@ public class HostelsControllerTests : IDisposable
         _mockHostelRepository?.Setup(repo => repo.GetAllHostelsAsync()).ReturnsAsync(GetHostels(1));
 
         HostelsController controller = new HostelsController(
-            _mockHostelRepository?.Object, _mapper);
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.GetAllHostels();
@@ -58,7 +62,8 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.GetHostelById(1);
@@ -73,7 +78,8 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.GetHostelById(1);
@@ -89,7 +95,8 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.CreateHostel(new HostelCreateUpdateDto { });
@@ -104,13 +111,38 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.CreateHostel(new HostelCreateUpdateDto { });
 
         // Assert
         Assert.IsType<CreatedAtRouteResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task CreateHostel_ReturnsCustomError_WhenCreateAnExistantHostel()
+    {
+        // Arrange
+        Hostel existantHostel = GetHostel();
+
+        _mockHostelRepository?.Setup(repo => repo.GetHostelByNameAsync("ExistantHostel"))
+            .ReturnsAsync(GetHostel());
+
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
+
+        // Act
+        var result = await controller.CreateHostel(new HostelCreateUpdateDto { Name = "ExistantHostel" });
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
+        var error = Assert.IsType<SerializableError>(badRequestResult.Value);
+        var errorMessages = (string[])error["CustomErrorName"];
+        var errorMessage = errorMessages[0];
+
+        Assert.Equal("Nhà trọ đã tồn tại.", errorMessage);
     }
 
     // Testing FullUpdateHostel
@@ -120,7 +152,8 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.FullUpdateHostel(1, new HostelCreateUpdateDto { });
@@ -135,7 +168,8 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.FullUpdateHostel(2, new HostelCreateUpdateDto { });
@@ -150,7 +184,8 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.FullUpdateHostel(0, new HostelCreateUpdateDto { });
@@ -166,7 +201,8 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.PartialUpdateHostel(2,
@@ -183,7 +219,8 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.DeleteHostel(1);
@@ -198,7 +235,8 @@ public class HostelsControllerTests : IDisposable
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetHostelByIdAsync(1)).ReturnsAsync(GetHostel());
 
-        HostelsController controller = new HostelsController(_mockHostelRepository.Object, _mapper);
+        HostelsController controller = new HostelsController(
+            _mockHostelRepository!.Object, _mockHostelLogger.Object, _mapper!);
 
         // Act
         var result = await controller.DeleteHostel(2);
