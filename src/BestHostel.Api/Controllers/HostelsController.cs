@@ -27,7 +27,7 @@ public class HostelsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<HostelReadDto>>> GetAllHostels()
     {
-        IEnumerable<Hostel> hostels = await _hostelRepository.GetAllHostelsAsync();
+        IEnumerable<Hostel> hostels = await _hostelRepository.GetAllAsync();
 
         _logger.LogInformation("Getting all hostels");
 
@@ -43,7 +43,7 @@ public class HostelsController : ControllerBase
             return BadRequest();
         }
 
-        Hostel? hostelFromDb = await _hostelRepository.GetHostelByIdAsync(id);
+        Hostel? hostelFromDb = await _hostelRepository.GetAsync(h => h.HostelId == id);
         if (hostelFromDb == null)
         {
             return NotFound();
@@ -55,7 +55,7 @@ public class HostelsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<HostelReadDto>> CreateHostel([FromBody] HostelCreateUpdateDto hostelCreateDto)
     {
-        if (await _hostelRepository.GetHostelByNameAsync(hostelCreateDto.Name) != null) // already exist in db
+        if (await _hostelRepository.GetAsync(h => h.Name == hostelCreateDto.Name) != null) // already exist in db
         {
             // key, value
             ModelState.AddModelError("CustomErrorName", "Nhà trọ đã tồn tại.");
@@ -69,8 +69,7 @@ public class HostelsController : ControllerBase
 
         Hostel hostel = _mapper.Map<Hostel>(hostelCreateDto);
 
-        _hostelRepository.CreateHostel(hostel);
-        await _hostelRepository.SaveChangesAsync();
+        await _hostelRepository.CreateAsync(hostel);
 
         HostelReadDto hostelReadDto = _mapper.Map<HostelReadDto>(hostel);
 
@@ -86,7 +85,7 @@ public class HostelsController : ControllerBase
             return BadRequest();
         }
 
-        Hostel? hostelFromDb = await _hostelRepository.GetHostelByIdAsync(id);
+        Hostel? hostelFromDb = await _hostelRepository.GetAsync(filter: h => h.HostelId == id, tracked: false);
         if (hostelFromDb == null)
         {
             return NotFound();
@@ -95,7 +94,7 @@ public class HostelsController : ControllerBase
         // Source -> Target
         _mapper.Map(hostelPutDto, hostelFromDb);
 
-        await _hostelRepository.SaveChangesAsync();
+        await _hostelRepository.UpdateAsnc(hostelFromDb);
 
         return NoContent();
     }
@@ -110,7 +109,7 @@ public class HostelsController : ControllerBase
             return BadRequest();
         }
 
-        Hostel? hostelFromDb = await _hostelRepository.GetHostelByIdAsync(id);
+        Hostel? hostelFromDb = await _hostelRepository.GetAsync(h => h.HostelId == id);
         if (hostelFromDb == null)
         {
             return NotFound();
@@ -128,7 +127,8 @@ public class HostelsController : ControllerBase
 
         _mapper.Map(hostelToPatchDto, hostelFromDb);
 
-        await _hostelRepository.SaveChangesAsync();
+        // Automatically track so no need to use _hostelRepository.UpdateAsync(hostelFromDb)
+        await _hostelRepository.SaveAsync();
 
         return NoContent();
     }
@@ -142,14 +142,13 @@ public class HostelsController : ControllerBase
             return BadRequest();
         }
 
-        Hostel? hostelFromDb = await _hostelRepository.GetHostelByIdAsync(id);
+        Hostel? hostelFromDb = await _hostelRepository.GetAsync(h => h.HostelId == id);
         if (hostelFromDb == null)
         {
             return NotFound();
         }
 
-        _hostelRepository.DeleteHostel(hostelFromDb);
-        await _hostelRepository.SaveChangesAsync();
+        await _hostelRepository.RemoveAsync(hostelFromDb);
 
         return NoContent();
     }
