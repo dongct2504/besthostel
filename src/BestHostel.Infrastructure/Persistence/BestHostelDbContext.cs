@@ -1,4 +1,4 @@
-using BestHostel.Domain;
+using BestHostel.Domain.Entities;
 using BestHostel.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;

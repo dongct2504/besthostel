@@ -1,6 +1,6 @@
 using AutoMapper;
-using BestHostel.Domain;
 using BestHostel.Domain.Dtos;
+using BestHostel.Domain.Entities;
 using BestHostel.Domain.Interfaces;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;

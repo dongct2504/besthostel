@@ -1,4 +1,4 @@
-﻿using BestHostel.Domain;
+﻿using BestHostel.Domain.Entities;
 using BestHostel.Domain.Interfaces;
 using BestHostel.Infrastructure.Persistence;
 

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace BestHostel.Domain;
+namespace BestHostel.Domain.Entities;
 
 public class Hostel
 {

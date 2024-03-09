@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using BestHostel.Domain;
+using BestHostel.Domain.Entities;
 using BestHostel.Domain.Dtos;
 
 namespace BestHostel.Api.Profiles;
