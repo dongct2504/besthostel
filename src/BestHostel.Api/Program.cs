@@ -28,6 +28,14 @@ var builder = WebApplication.CreateBuilder(args);
     builder.Services.AddDbContext<BestHostelDbContext>(options =>
         options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString));
 
+    // // register logger
+    // Log.Logger = new LoggerConfiguration()
+    //     .MinimumLevel.Debug() // everything above Debug will be logged
+    //     .WriteTo.File("Log/hostel_logs.txt")
+    //     .CreateLogger();
+
+    // builder.Host.UseSerilog();
+
     // register automapper
     builder.Services.AddAutoMapper(typeof(Program));
 

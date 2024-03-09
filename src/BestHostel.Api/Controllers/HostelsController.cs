@@ -62,6 +62,11 @@ public class HostelsController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        if (hostelCreateDto == null)
+        {
+            return BadRequest();
+        }
+
         Hostel hostel = _mapper.Map<Hostel>(hostelCreateDto);
 
         _hostelRepository.CreateHostel(hostel);
@@ -77,6 +82,7 @@ public class HostelsController : ControllerBase
     {
         if (id == 0)
         {
+            _logger.LogError($"Get hostel error with id: {id}");
             return BadRequest();
         }
 
@@ -100,6 +106,7 @@ public class HostelsController : ControllerBase
     {
         if (id == 0)
         {
+            _logger.LogError($"Get hostel error with id: {id}");
             return BadRequest();
         }
 
@@ -131,6 +138,7 @@ public class HostelsController : ControllerBase
     {
         if (id == 0)
         {
+            _logger.LogError($"Get hostel error with id: {id}");
             return BadRequest();
         }
 
