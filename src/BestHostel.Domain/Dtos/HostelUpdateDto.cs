@@ -2,7 +2,7 @@
 
 namespace BestHostel.Domain.Dtos;
 
-public class HostelCreateUpdateDto
+public class HostelUpdateDto
 {
     [Required]
     [StringLength(128)]

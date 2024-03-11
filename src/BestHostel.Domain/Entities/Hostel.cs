@@ -50,4 +50,7 @@ public class Hostel
 
     [NotMapped]
     public decimal DiscountPrice => Price - DiscountAmount;
+
+    [InverseProperty("Hostel")]
+    public ICollection<HostelNumber> HostelNumbers { get; set; } = new List<HostelNumber>();
 }

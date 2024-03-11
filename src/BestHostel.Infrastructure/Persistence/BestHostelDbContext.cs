@@ -14,6 +14,7 @@ public class BestHostelDbContext : IdentityDbContext<BestHostelUser>
     }
 
     public DbSet<Hostel> Hostels { get; set; }
+    public DbSet<HostelNumber> HostelNumbers { get; set; }
 
     public DbSet<BestHostelUser> BestHostelUsers { get; set; }
 }

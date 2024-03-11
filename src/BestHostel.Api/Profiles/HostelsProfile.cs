@@ -10,7 +10,7 @@ public class HostelsProfile : Profile
     {
         // Source -> target
         CreateMap<Hostel, HostelReadDto>().ReverseMap(); // no need to map hostelDto to hostel
-
-        CreateMap<Hostel, HostelCreateUpdateDto>().ReverseMap();
+        CreateMap<Hostel, HostelCreateDto>().ReverseMap();
+        CreateMap<Hostel, HostelUpdateDto>().ReverseMap();
     }
 }

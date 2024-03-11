@@ -59,7 +59,7 @@ public class HostelsControllerTests : IDisposable
         var result = await controller.GetAllHostels();
 
         // Assert
-        Assert.IsType<ActionResult<IEnumerable<HostelReadDto>>>(result);
+        Assert.IsType<ActionResult<IEnumerable<HostelReadDto>>>(result.Result);
     }
 
     // Testing GetHostelById
@@ -109,7 +109,7 @@ public class HostelsControllerTests : IDisposable
             _mockHostelRepository!.Object, _mockHostelLogger!.Object, _mapper!);
 
         // Act
-        var result = await controller.CreateHostel(new HostelCreateUpdateDto { });
+        var result = await controller.CreateHostel(new HostelCreateDto { });
 
         // Assert
         Assert.IsType<ActionResult<HostelReadDto>>(result);
@@ -126,7 +126,7 @@ public class HostelsControllerTests : IDisposable
             _mockHostelRepository!.Object, _mockHostelLogger!.Object, _mapper!);
 
         // Act
-        var result = await controller.CreateHostel(new HostelCreateUpdateDto { });
+        var result = await controller.CreateHostel(new HostelCreateDto { });
 
         // Assert
         Assert.IsType<CreatedAtRouteResult>(result.Result);
@@ -166,7 +166,7 @@ public class HostelsControllerTests : IDisposable
             _mockHostelRepository!.Object, _mockHostelLogger!.Object, _mapper!);
 
         // Act
-        var result = await controller.FullUpdateHostel(1, new HostelCreateUpdateDto { });
+        var result = await controller.FullUpdateHostel(1, new HostelUpdateDto { });
 
         // Assert
         Assert.IsType<NoContentResult>(result);
@@ -183,7 +183,7 @@ public class HostelsControllerTests : IDisposable
             _mockHostelRepository!.Object, _mockHostelLogger!.Object, _mapper!);
 
         // Act
-        var result = await controller.FullUpdateHostel(2, new HostelCreateUpdateDto { });
+        var result = await controller.FullUpdateHostel(2, new HostelUpdateDto { });
 
         // Assert
         Assert.IsType<NotFoundResult>(result);
@@ -200,7 +200,7 @@ public class HostelsControllerTests : IDisposable
             _mockHostelRepository!.Object, _mockHostelLogger!.Object, _mapper!);
 
         // Act
-        var result = await controller.FullUpdateHostel(0, new HostelCreateUpdateDto { });
+        var result = await controller.FullUpdateHostel(0, new HostelUpdateDto { });
 
         // Assert
         Assert.IsType<BadRequestResult>(result);
@@ -219,7 +219,7 @@ public class HostelsControllerTests : IDisposable
 
         // Act
         var result = await controller.PartialUpdateHostel(2,
-            new Microsoft.AspNetCore.JsonPatch.JsonPatchDocument<HostelCreateUpdateDto> { });
+            new Microsoft.AspNetCore.JsonPatch.JsonPatchDocument<HostelUpdateDto> { });
 
         // Assert
         Assert.IsType<NotFoundResult>(result);
