@@ -1,42 +1,43 @@
-using AutoMapper;
+﻿using AutoMapper;
 using BestHostel.Domain.Dtos;
 using BestHostel.Domain.Entities;
 using BestHostel.Domain.Interfaces;
 using BestHostel.Infrastructure.Responses;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace BestHostel.Api;
 
 [ApiController]
-[Route("api/hostels")]
-public class HostelsController : ControllerBase
+[Route("api/hostel-numbers")]
+public class HostelNumbersController : ControllerBase
 {
     private readonly ApiResponse _apiResponse;
-    private readonly IHostelRepository _hostelRepository;
-    private readonly ILogger<HostelsController> _logger;
+    private readonly IHostelNumberRepository _hostelNumberRepository;
+    private readonly ILogger<HostelNumbersController> _logger;
     private readonly IMapper _mapper;
 
-    public HostelsController(IHostelRepository hostelRepository,
-        ILogger<HostelsController> logger,
+    public HostelNumbersController(IHostelNumberRepository hostelNumberRepository,
+        ILogger<HostelNumbersController> logger,
         IMapper mapper)
     {
         _apiResponse = new ApiResponse();
-        _hostelRepository = hostelRepository;
+        _hostelNumberRepository = hostelNumberRepository;
         _logger = logger;
         _mapper = mapper;
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse>> GetAllHostels()
+    public async Task<ActionResult<ApiResponse>> GetAllHostelNumbers()
     {
         try
         {
-            IEnumerable<Hostel> hostels = await _hostelRepository.GetAllAsync();
+            IEnumerable<HostelNumber> hostelNumbers = await _hostelNumberRepository.GetAllAsync();
 
-            _logger.LogInformation("Getting all hostels");
+            _logger.LogInformation("Get all Hostel Numbers");
 
-            _apiResponse.Result = _mapper.Map<IEnumerable<HostelReadDto>>(hostels);
+            _apiResponse.Result = _mapper.Map<IEnumerable<HostelNumberReadDto>>(hostelNumbers);
             _apiResponse.StatusCode = System.Net.HttpStatusCode.OK;
 
             return Ok(_apiResponse);
@@ -51,14 +52,14 @@ public class HostelsController : ControllerBase
         }
     }
 
-    [HttpGet("{id:int}", Name = "GetHostelById")]
-    public async Task<ActionResult<ApiResponse>> GetHostelById(int id)
+    [HttpGet("{id:int}", Name = "GetHostelNumber")]
+    public async Task<ActionResult<ApiResponse>> GetHostelNumber(int id)
     {
         try
         {
-            if (id == 0)
+            if (id < 0)
             {
-                string errorMessage = $"Get hostel error with id: {id}";
+                string errorMessage = $"Get hostel number error with id: {id}";
 
                 _logger.LogError(errorMessage);
 
@@ -69,10 +70,10 @@ public class HostelsController : ControllerBase
                 return BadRequest(_apiResponse);
             }
 
-            Hostel? hostelFromDb = await _hostelRepository.GetAsync(h => h.HostelId == id);
-            if (hostelFromDb == null)
+            HostelNumber? hostelNumberFromDb = await _hostelNumberRepository.GetAsync(h => h.HostelNo == id);
+            if (hostelNumberFromDb == null)
             {
-                string errorMessage = $"Not Found hostel by this id: {id}";
+                string errorMessage = $"Not Found hostel number by this Hostel number: {id}";
 
                 _logger.LogError(errorMessage);
 
@@ -83,7 +84,7 @@ public class HostelsController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            _apiResponse.Result = _mapper.Map<HostelReadDto>(hostelFromDb);
+            _apiResponse.Result = _mapper.Map<HostelNumberReadDto>(hostelNumberFromDb);
             _apiResponse.StatusCode = System.Net.HttpStatusCode.OK;
 
             return Ok(_apiResponse);
@@ -99,20 +100,21 @@ public class HostelsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse>> CreateHostel([FromBody] HostelCreateDto hostelCreateDto)
+    public async Task<ActionResult<ApiResponse>> CreateHostelNumber(
+        [FromBody] HostelNumberCreateDto hostelNumberCreateDto)
     {
         try
         {
-            if (await _hostelRepository.GetAsync(h => h.Name == hostelCreateDto.Name) != null)
+            if (await _hostelNumberRepository.GetAsync(h => h.HostelNo == hostelNumberCreateDto.HostelNo) != null)
             {
                 // key, value
                 ModelState.AddModelError("CustomErrorName", "Nhà trọ đã tồn tại.");
                 return BadRequest(ModelState);
             }
 
-            if (hostelCreateDto == null)
+            if (hostelNumberCreateDto == null)
             {
-                string errorMessage = "Can not create hostel because it is null";
+                string errorMessage = "Can not create hostel number because it is null";
 
                 _apiResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
                 _apiResponse.IsSuccess = false;
@@ -121,14 +123,14 @@ public class HostelsController : ControllerBase
                 return BadRequest(_apiResponse);
             }
 
-            Hostel hostel = _mapper.Map<Hostel>(hostelCreateDto);
+            HostelNumber hostelNumber = _mapper.Map<HostelNumber>(hostelNumberCreateDto);
 
-            await _hostelRepository.CreateAsync(hostel);
+            await _hostelNumberRepository.CreateAsync(hostelNumber);
 
-            _apiResponse.Result = _mapper.Map<HostelReadDto>(hostel);
+            _apiResponse.Result = _mapper.Map<HostelNumberReadDto>(hostelNumber);
             _apiResponse.StatusCode = System.Net.HttpStatusCode.Created;
 
-            return CreatedAtRoute(nameof(GetHostelById), new { Id = hostel.HostelId }, _apiResponse);
+            return CreatedAtRoute("GetHostelNumber", new { Id = hostelNumber.HostelNo }, _apiResponse);
         }
         catch (Exception e)
         {
@@ -141,14 +143,14 @@ public class HostelsController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult<ApiResponse>> FullUpdateHostel(int id,
-        [FromBody] HostelUpdateDto hostelPutDto)
+    public async Task<ActionResult<ApiResponse>> FullUpdateHostelNumber(int id,
+        [FromBody] HostelNumberUpdateDto hostelNumberUpdateDto)
     {
         try
         {
-            if (id == 0)
+            if (id < 0)
             {
-                string errorMessage = $"Get hostel error with id: {id}";
+                string errorMessage = $"Get hostel number error with id: {id}";
 
                 _logger.LogError(errorMessage);
 
@@ -159,10 +161,11 @@ public class HostelsController : ControllerBase
                 return BadRequest(_apiResponse);
             }
 
-            Hostel? hostelFromDb = await _hostelRepository.GetAsync(filter: h => h.HostelId == id, tracked: false);
-            if (hostelFromDb == null)
+            HostelNumber? hostelNumberFromDb = await _hostelNumberRepository.GetAsync(
+                filter: h => h.HostelNo == id, tracked: false);
+            if (hostelNumberFromDb == null)
             {
-                string errorMessage = $"Not Found hostel by this id: {id}";
+                string errorMessage = $"Not Found hostel number by this id: {id}";
 
                 _logger.LogError(errorMessage);
 
@@ -173,10 +176,9 @@ public class HostelsController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            // Source -> Target
-            _mapper.Map(hostelPutDto, hostelFromDb);
+            _mapper.Map(hostelNumberUpdateDto, hostelNumberFromDb);
 
-            await _hostelRepository.UpdateAsnc(hostelFromDb);
+            await _hostelNumberRepository.UpdateAsync(hostelNumberFromDb);
 
             _apiResponse.StatusCode = System.Net.HttpStatusCode.NoContent;
 
@@ -193,28 +195,29 @@ public class HostelsController : ControllerBase
     }
 
     [HttpPatch("{id:int}")]
-    public async Task<ActionResult<ApiResponse>> PartialUpdateHostel(int id,
-        JsonPatchDocument<HostelUpdateDto> jsonPatchDoc)
+    public async Task<ActionResult<ApiResponse>> PartialUpdateHostelNumber(int id,
+        [FromBody] JsonPatchDocument<HostelNumberUpdateDto> jsonPatchDoc)
     {
         try
         {
-            if (id == 0)
+            if (id < 0)
             {
-                string errorMessage = $"Get hostel error with id: {id}";
+                string errorMessage = $"Not Found hostel number by this id: {id}";
 
                 _logger.LogError(errorMessage);
 
-                _apiResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
                 _apiResponse.IsSuccess = false;
                 _apiResponse.ErrorMessages = new List<string> { errorMessage };
+                _apiResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
 
                 return BadRequest(_apiResponse);
             }
 
-            Hostel? hostelFromDb = await _hostelRepository.GetAsync(h => h.HostelId == id);
-            if (hostelFromDb == null)
+            HostelNumber? hostelNumberFromDb = await _hostelNumberRepository
+                .GetAsync(h => h.HostelNo == id, false);
+            if (hostelNumberFromDb == null)
             {
-                string errorMessage = $"Not Found hostel by this id: {id}";
+                string errorMessage = $"Not Found hostel number by this id: {id}";
 
                 _logger.LogError(errorMessage);
 
@@ -225,20 +228,17 @@ public class HostelsController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            HostelUpdateDto hostelToPatchDto = _mapper.Map<HostelUpdateDto>(hostelFromDb);
+            HostelNumberUpdateDto hostelNumberToPatchDto = _mapper.Map<HostelNumberUpdateDto>(hostelNumberFromDb);
 
-            // validate
-            jsonPatchDoc.ApplyTo(hostelToPatchDto, ModelState);
-
-            if (!TryValidateModel(hostelToPatchDto))
+            jsonPatchDoc.ApplyTo(hostelNumberToPatchDto, ModelState);
+            if (!TryValidateModel(ModelState))
             {
                 return ValidationProblem(ModelState);
             }
 
-            _mapper.Map(hostelToPatchDto, hostelFromDb);
+            _mapper.Map(hostelNumberToPatchDto, hostelNumberFromDb);
 
-            // Automatically track so no need to use _hostelRepository.UpdateAsync(hostelFromDb)
-            await _hostelRepository.SaveAsync();
+            await _hostelNumberRepository.UpdateAsync(hostelNumberFromDb);
 
             _apiResponse.StatusCode = System.Net.HttpStatusCode.NoContent;
 
@@ -255,27 +255,27 @@ public class HostelsController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<ActionResult<ApiResponse>> DeleteHostel(int id)
+    public async Task<ActionResult<ApiResponse>> DeleteHostelNumber(int id)
     {
         try
         {
-            if (id == 0)
+            if (id < 0)
             {
-                string errorMessage = $"Get hostel error with id: {id}";
+                string errorMessage = $"Not Found hostel number by this id: {id}";
 
                 _logger.LogError(errorMessage);
 
-                _apiResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
                 _apiResponse.IsSuccess = false;
+                _apiResponse.StatusCode = System.Net.HttpStatusCode.BadRequest;
                 _apiResponse.ErrorMessages = new List<string> { errorMessage };
 
                 return BadRequest(_apiResponse);
             }
 
-            Hostel? hostelFromDb = await _hostelRepository.GetAsync(h => h.HostelId == id);
-            if (hostelFromDb == null)
+            HostelNumber? hostelNumberFromDb = await _hostelNumberRepository.GetAsync(h => h.HostelNo == id);
+            if (hostelNumberFromDb == null)
             {
-                string errorMessage = $"Not Found hostel by this id: {id}";
+                string errorMessage = $"Not Found hostel number by this id: {id}";
 
                 _logger.LogError(errorMessage);
 
@@ -286,7 +286,7 @@ public class HostelsController : ControllerBase
                 return NotFound(_apiResponse);
             }
 
-            await _hostelRepository.RemoveAsync(hostelFromDb);
+            await _hostelNumberRepository.RemoveAsync(hostelNumberFromDb);
 
             _apiResponse.StatusCode = System.Net.HttpStatusCode.NoContent;
 

@@ -4,6 +4,7 @@ using BestHostel.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BestHostel.Infrastructure.Identity.Migrations
 {
     [DbContext(typeof(BestHostelDbContext))]
-    partial class BestHostelDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240311042316_AddHostelNumber")]
+    partial class AddHostelNumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

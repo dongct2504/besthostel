@@ -4,13 +4,17 @@ using BestHostel.Domain.Dtos;
 
 namespace BestHostel.Api.Profiles;
 
-public class HostelsProfile : Profile
+public class BestHostelProfile : Profile
 {
-    public HostelsProfile()
+    public BestHostelProfile()
     {
         // Source -> target
         CreateMap<Hostel, HostelReadDto>().ReverseMap(); // no need to map hostelDto to hostel
         CreateMap<Hostel, HostelCreateDto>().ReverseMap();
         CreateMap<Hostel, HostelUpdateDto>().ReverseMap();
+
+        CreateMap<HostelNumber, HostelNumberReadDto>().ReverseMap();
+        CreateMap<HostelNumber, HostelNumberCreateDto>().ReverseMap();
+        CreateMap<HostelNumber, HostelNumberUpdateDto>().ReverseMap();
     }
 }

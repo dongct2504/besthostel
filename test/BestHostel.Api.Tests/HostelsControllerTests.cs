@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using System.Linq.Expressions;
+using BestHostel.Infrastructure.Responses;
 
 namespace BestHostel.Api.Tests;
 
@@ -15,7 +16,7 @@ public class HostelsControllerTests : IDisposable
     private Mock<IHostelRepository>? _mockHostelRepository;
     private Mock<ILogger<HostelsController>>? _mockHostelLogger;
 
-    private HostelsProfile? _hostelsProfile;
+    private BestHostelProfile? _hostelsProfile;
     private IMapper? _mapper;
 
     public HostelsControllerTests()
@@ -24,7 +25,7 @@ public class HostelsControllerTests : IDisposable
         _mockHostelLogger = new Mock<ILogger<HostelsController>>();
 
         // add real mapper
-        _hostelsProfile = new HostelsProfile();
+        _hostelsProfile = new BestHostelProfile();
 
         var mapperConfiguration = new MapperConfiguration(config =>
             config.AddProfile(_hostelsProfile));
@@ -42,7 +43,7 @@ public class HostelsControllerTests : IDisposable
 
     // Testing GetAllHostels
     [Fact]
-    public async Task GetAllHostels_ReturnsCorrectResultType_WhenValidObjectSubmitted()
+    public async Task GetAllHostels_Returns200Ok_WhenValidObjectSubmitted()
     {
         // Note the use of It.* argument matcher to allow for any argument values 
         // to be entered and still get the desired behavior
@@ -57,14 +58,18 @@ public class HostelsControllerTests : IDisposable
 
         // Act
         var result = await controller.GetAllHostels();
+        var okResult = result.Result as OkObjectResult;
+        var apiResponse = okResult?.Value as ApiResponse;
 
         // Assert
-        Assert.IsType<ActionResult<IEnumerable<HostelReadDto>>>(result.Result);
+        Assert.NotNull(okResult);
+        Assert.NotNull(apiResponse);
+        Assert.Equal(System.Net.HttpStatusCode.OK, apiResponse.StatusCode);
     }
 
     // Testing GetHostelById
     [Fact]
-    public async Task GetHostel_ReturnsCorrectResultType_WhenValidObjectSubmitted()
+    public async Task GetHostel_Returns200Ok_WhenValidObjectSubmitted()
     {
         // Arrange
         _mockHostelRepository?.Setup(repo => repo.GetAsync(h => h.HostelId == 1, It.IsAny<bool>()))
@@ -75,46 +80,16 @@ public class HostelsControllerTests : IDisposable
 
         // Act
         var result = await controller.GetHostelById(1);
+        var okResult = result.Result as OkObjectResult;
+        var apiResponse = okResult?.Value as ApiResponse;
 
         // Assert
-        Assert.IsType<ActionResult<HostelReadDto>>(result);
-    }
-
-    [Fact]
-    public async Task GetHostel_Returns200Ok_WhenValidIdProvide()
-    {
-        // Arrange
-        _mockHostelRepository?.Setup(repo => repo.GetAsync(h => h.HostelId == 1, It.IsAny<bool>()))
-            .ReturnsAsync(GetHostel());
-
-        HostelsController controller = new HostelsController(
-            _mockHostelRepository!.Object, _mockHostelLogger!.Object, _mapper!);
-
-        // Act
-        var result = await controller.GetHostelById(1);
-
-        // Assert
-        Assert.IsType<OkObjectResult>(result.Result);
+        Assert.NotNull(okResult);
+        Assert.NotNull(apiResponse);
+        Assert.Equal(System.Net.HttpStatusCode.OK, apiResponse.StatusCode);
     }
 
     // Testing CreateHostel
-    [Fact]
-    public async Task CreateHostel_ReturnsCorrectResultType_WhenValidObjectSubmitted()
-    {
-        // Arrange
-        _mockHostelRepository?.Setup(repo => repo.GetAsync(h => h.HostelId == 1, It.IsAny<bool>()))
-            .ReturnsAsync(GetHostel());
-
-        HostelsController controller = new HostelsController(
-            _mockHostelRepository!.Object, _mockHostelLogger!.Object, _mapper!);
-
-        // Act
-        var result = await controller.CreateHostel(new HostelCreateDto { });
-
-        // Assert
-        Assert.IsType<ActionResult<HostelReadDto>>(result);
-    }
-
     [Fact]
     public async Task CreateHostel_Returns201Created_WhenValidObjectSubmitted()
     {
@@ -127,9 +102,13 @@ public class HostelsControllerTests : IDisposable
 
         // Act
         var result = await controller.CreateHostel(new HostelCreateDto { });
+        var createdAtRoute = result.Result as CreatedAtRouteResult;
+        var apiResponse = createdAtRoute?.Value as ApiResponse;
 
         // Assert
-        Assert.IsType<CreatedAtRouteResult>(result.Result);
+        Assert.NotNull(createdAtRoute);
+        Assert.NotNull(apiResponse);
+        Assert.Equal(System.Net.HttpStatusCode.Created, apiResponse.StatusCode);
     }
 
     // [Fact]
@@ -167,9 +146,13 @@ public class HostelsControllerTests : IDisposable
 
         // Act
         var result = await controller.FullUpdateHostel(1, new HostelUpdateDto { });
+        var okResult = result.Result as OkObjectResult;
+        var apiResponse = okResult?.Value as ApiResponse;
 
         // Assert
-        Assert.IsType<NoContentResult>(result);
+        Assert.NotNull(okResult);
+        Assert.NotNull(apiResponse);
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, apiResponse.StatusCode);
     }
 
     [Fact]
@@ -184,9 +167,13 @@ public class HostelsControllerTests : IDisposable
 
         // Act
         var result = await controller.FullUpdateHostel(2, new HostelUpdateDto { });
+        var notFoundResult = result.Result as NotFoundObjectResult;
+        var apiResponse = notFoundResult?.Value as ApiResponse;
 
         // Assert
-        Assert.IsType<NotFoundResult>(result);
+        Assert.NotNull(notFoundResult);
+        Assert.NotNull(apiResponse);
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, apiResponse.StatusCode);
     }
 
     [Fact]
@@ -201,9 +188,13 @@ public class HostelsControllerTests : IDisposable
 
         // Act
         var result = await controller.FullUpdateHostel(0, new HostelUpdateDto { });
+        var badRequestResult = result.Result as BadRequestObjectResult;
+        var apiResponse = badRequestResult?.Value as ApiResponse;
 
         // Assert
-        Assert.IsType<BadRequestResult>(result);
+        Assert.NotNull(badRequestResult);
+        Assert.NotNull(apiResponse);
+        Assert.Equal(System.Net.HttpStatusCode.BadRequest, apiResponse.StatusCode);
     }
 
     // Testing PartialUpdateHostel
@@ -220,9 +211,13 @@ public class HostelsControllerTests : IDisposable
         // Act
         var result = await controller.PartialUpdateHostel(2,
             new Microsoft.AspNetCore.JsonPatch.JsonPatchDocument<HostelUpdateDto> { });
+        var notFoundResult = result.Result as NotFoundObjectResult;
+        var apiResponse = notFoundResult?.Value as ApiResponse;
 
         // Assert
-        Assert.IsType<NotFoundResult>(result);
+        Assert.NotNull(notFoundResult);
+        Assert.NotNull(apiResponse);
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, apiResponse.StatusCode);
     }
 
     // Testing PartialUpdateHostel
@@ -238,9 +233,13 @@ public class HostelsControllerTests : IDisposable
 
         // Act
         var result = await controller.DeleteHostel(1);
+        var okResult = result.Result as OkObjectResult;
+        var apiResponse = okResult?.Value as ApiResponse;
 
         // Assert
-        Assert.IsType<NoContentResult>(result);
+        Assert.NotNull(okResult);
+        Assert.NotNull(apiResponse);
+        Assert.Equal(System.Net.HttpStatusCode.NoContent, apiResponse.StatusCode);
     }
 
     [Fact]
@@ -255,9 +254,13 @@ public class HostelsControllerTests : IDisposable
 
         // Act
         var result = await controller.DeleteHostel(2);
+        var notFoundResult = result.Result as NotFoundObjectResult;
+        var apiResponse = notFoundResult?.Value as ApiResponse;
 
         // Assert
-        Assert.IsType<NotFoundResult>(result);
+        Assert.NotNull(notFoundResult);
+        Assert.NotNull(apiResponse);
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, apiResponse.StatusCode);
     }
 
     private IEnumerable<Hostel> GetHostels(int id)

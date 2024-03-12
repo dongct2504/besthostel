@@ -1,6 +1,8 @@
 ﻿namespace BestHostel.Domain.Dtos;
 
-public class HostelNumberUpdateDto
+public class HostelNumberReadDto
 {
+    public int HostelNo { get; set; }
+
     public string SpecialDetails { get; set; } = string.Empty;
 }
